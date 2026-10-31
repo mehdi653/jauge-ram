@@ -5,6 +5,41 @@ de fermer l'application fautive en deux clics. À côté, l'utilisation du proce
 
 ![jauge](docs/preview.png)
 
+## Installer avec une IA
+
+Copie ce prompt (bouton de copie en haut à droite du bloc) et colle-le dans un assistant
+de code IA capable de lancer des commandes dans le Terminal de ton Mac :
+
+```text
+Installe Jauge RAM sur ce Mac depuis https://github.com/mehdi653/jauge-ram. Suis ces
+étapes dans l'ordre ; si l'une échoue, arrête-toi et explique-moi le problème.
+
+1. Vérifie que c'est un Mac Apple Silicon (`uname -m` affiche arm64) sous macOS 13 ou
+   plus récent (`sw_vers -productVersion`).
+2. Vérifie que le compilateur Swift répond (`swiftc --version`). Sinon, lance
+   `xcode-select --install`, demande-moi de terminer l'installation des Command Line
+   Tools dans la fenêtre qui s'ouvre, attends ma confirmation, puis reprends.
+3. Si ~/jauge-ram n'existe pas, clone le dépôt dedans. S'il existe, vérifie que
+   `git -C ~/jauge-ram remote get-url origin` désigne ce dépôt et que
+   `git -C ~/jauge-ram status --porcelain` n'affiche rien, puis mets-le à jour avec
+   `git -C ~/jauge-ram pull --ff-only`. Sinon, demande-moi quoi faire.
+4. Lis ~/jauge-ram/build.sh et résume-moi en une phrase ce qu'il fait.
+5. Si une Jauge RAM tourne déjà (`pgrep -x JaugeRAM`), demande-moi de la quitter
+   (menu de la jauge → Quitter Jauge RAM) et attends ma confirmation.
+6. Compile : `cd ~/jauge-ram && ./build.sh`.
+7. Lance l'app : `open ~/jauge-ram/build/"Jauge RAM.app"`, puis vérifie qu'elle tourne
+   (`pgrep -x JaugeRAM`). Si macOS refuse de l'ouvrir, dis-moi d'aller dans Réglages
+   Système → Confidentialité et sécurité → « Ouvrir quand même ».
+8. Demande-moi si je vois une jauge « RAM / CPU » dans la barre des menus. Sinon, la
+   barre est souvent trop pleine (encoche) : retirer une autre icône la fait revenir.
+   Rappelle-moi que « Lancer au démarrage » se coche dans le menu de la jauge.
+
+N'utilise jamais sudo. À part les Command Line Tools si elles manquent, n'installe et ne
+modifie rien en dehors de ~/jauge-ram ; une fois lancée, l'app gère ses propres fichiers.
+```
+
+Sans IA, les mêmes étapes à la main : voir [Construire](#construire) et [Lancer](#lancer).
+
 ## Pourquoi pas « RAM utilisée » ?
 
 macOS garde volontairement la RAM pleine : la mémoire libre est du gaspillage, il l'utilise
