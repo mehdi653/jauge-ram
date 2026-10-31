@@ -1,5 +1,7 @@
 # Jauge RAM
 
+**Français** · [English](README.en.md)
+
 Une jauge dans la barre des menus qui prévient **avant** que le Mac ne rame, et permet
 de fermer l'application fautive en deux clics. À côté, l'utilisation du processeur.
 
