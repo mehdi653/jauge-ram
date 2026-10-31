@@ -1,0 +1,124 @@
+/* Jauge RAM — anglais. Clé : le texte français du code source (voir Sources/Localization.swift). */
+
+/* AppDelegate.swift */
+"Pression mémoire" = "Memory pressure";
+"bundle détecté : %@ — %@" = "bundle detected: %@ — %@";
+"aucun" = "none";
+"Pression mémoire %lld %%, %@. Processeur : %@" = "Memory pressure %lld%%, %@. CPU: %@";
+"Pression mémoire : %lld %% — %@\nSwap : %@\nProcesseur : %@" = "Memory pressure: %lld%% — %@\nSwap: %@\nCPU: %@";
+"Apps" = "Apps";
+"Mémoire compressée" = "Compressed memory";
+"Réservée système" = "Wired (system)";
+"Fichiers en cache" = "Cached files";
+"%@ (récupérable)" = "%@ (reclaimable)";
+"Swap sur disque" = "Swap on disk";
+"%@ libres" = "%@ free";
+"  ⚠︎ disque plein à %lld %%" = "  ⚠︎ disk %lld%% full";
+"Espace disque" = "Disk space";
+"Processeur" = "CPU";
+"Les plus gourmands en mémoire" = "Top memory users";
+"Analyse en cours…" = "Analyzing…";
+"Arrière-plan et système" = "Background and system";
+"Les plus gourmands en processeur" = "Top CPU users";
+"Aucun processus actif" = "No active process";
+"Autres processus et système" = "Other processes and system";
+"Mesure en cours…" = "Measuring…";
+"Nettoyer les caches…" = "Clean Caches…";
+"Ouvrir le Moniteur d'activité" = "Open Activity Monitor";
+"Lancer au démarrage" = "Launch at Login";
+"Quitter Jauge RAM" = "Quit Jauge RAM";
+"Pression mémoire  %lld %%\n" = "Memory pressure  %lld%%\n";
+"mesure en cours…" = "measuring…";
+"%@ sur %lld cœurs" = "%@ across %lld cores";
+"  ·  %lld processus" = "  ·  %lld processes";
+"Passer à l'app" = "Switch to App";
+"Quitter %@" = "Quit %@";
+"Composant système · pid %d" = "System component · pid %d";
+"Processus en arrière-plan · pid %d" = "Background process · pid %d";
+"Géré par macOS — ne pas arrêter" = "Managed by macOS — do not stop";
+"Forcer à quitter (travail non enregistré perdu)" = "Force Quit (unsaved work is lost)";
+"Arrêter le processus" = "Stop Process";
+"Forcer %@ à quitter ?" = "Force %@ to quit?";
+"Tout travail non enregistré sera perdu." = "Any unsaved work will be lost.";
+"Ce processus sera arrêté immédiatement (pid %d). S'il fait partie du système ou d'un travail en cours, il peut y avoir des dégâts." = "This process will be stopped immediately (pid %d). If it is part of the system or of work in progress, this may cause damage.";
+"Forcer à quitter" = "Force Quit";
+"Arrêter" = "Stop";
+"Annuler" = "Cancel";
+"Disque presque plein — %@ libres" = "Disk almost full — %@ free";
+"Le swap n'a plus de place. Ouvre « Nettoyer les caches… » dans la jauge." = "Swap has no room left. Open “Clean Caches…” in the gauge.";
+"Ferme une application pour éviter que le Mac ne rame." = "Close an app to keep your Mac from slowing down.";
+"Les plus gourmandes : %@" = "Biggest users: %@";
+"Mémoire critique — %lld %%" = "Critical memory — %lld%%";
+"AUCUN" = "NONE";
+"libellé      %@" = "label        %@";
+"valeur       %@" = "value        %@";
+"menu : %lld éléments" = "menu: %lld items";
+"1 processus · %@" = "1 process · %@";
+"%lld processus · %@" = "%lld processes · %@";
+
+/* CleanupWindow.swift */
+"Calcul des tailles…" = "Calculating sizes…";
+"Nettoyer la sélection" = "Clean Selection";
+"Nettoyage du disque" = "Disk Cleanup";
+"Fermer" = "Close";
+"Disque : %@ libres sur %@ — occupé à %lld %%" = "Disk: %@ free of %@ — %lld%% used";
+"Nettoyer la sélection (%@)" = "Clean Selection (%@)";
+"Nettoyé" = "Cleaned";
+"Lien symbolique : ignoré, pour ne pas vider le dossier visé" = "Symbolic link: skipped, so the folder it points to is not emptied";
+"Le contenu est supprimé définitivement (pas de passage par la corbeille). Ces caches se reconstruisent tout seuls ; le prochain build sera plus lent." = "The contents are deleted permanently (they do not go to the Trash). These caches rebuild themselves; the next build will be slower.";
+"Vider" = "Empty";
+"Nettoyage…" = "Cleaning…";
+"%@ libérés" = "%@ freed";
+"Vider 1 cache ?" = "Empty 1 cache?";
+"Vider %lld caches ?" = "Empty %lld caches?";
+"1 élément verrouillé" = "1 item locked";
+"%lld éléments verrouillés" = "%lld items locked";
+
+/* DiskCleanup.swift */
+"Dépendances et builds Android/Java" = "Android/Java dependencies and builds";
+"Paquets Python téléchargés" = "Downloaded Python packages";
+"Paquets Node téléchargés" = "Downloaded Node packages";
+"Paquets installés par bun" = "Packages installed by bun";
+"Modèles téléchargés" = "Downloaded models";
+"Navigateurs téléchargés pour les tests" = "Browsers downloaded for tests";
+"Registre et sources téléchargés" = "Downloaded registry and sources";
+"Builds intermédiaires, reconstruits" = "Intermediate builds, rebuilt";
+"Caches d'applications" = "App caches";
+"~/Library/Caches — ferme tes apps avant" = "~/Library/Caches — close your apps first";
+"Simulateurs iOS" = "iOS Simulators";
+"Appareils et runtimes CoreSimulator" = "CoreSimulator devices and runtimes";
+"Tes machines virtuelles — DONNÉES" = "Your virtual machines — DATA";
+"Téléchargements" = "Downloads";
+"À trier toi-même" = "Sort these yourself";
+"%@ : protégé, non supprimé" = "%@: protected, not deleted";
+"%@ : lien symbolique, ignoré" = "%@: symbolic link, skipped";
+"%@ : %@" = "%@: %@";
+
+/* MemoryStats.swift */
+"OK" = "OK";
+"Ça chauffe" = "Getting tight";
+"Critique — ferme une app" = "Critical — close an app";
+
+/* main.swift */
+"RAM totale" = "Total RAM";
+"Compressée" = "Compressed";
+"Cache fichiers" = "File cache";
+"Libre" = "Free";
+"Swap" = "Swap";
+"Niveau noyau" = "Kernel level";
+"SCORE" = "SCORE";
+"%lld %% — %@" = "%lld%% — %@";
+"%@ sur %lld cœurs (utilisateur %@, système %@)" = "%@ across %lld cores (user %@, system %@)";
+"Processeur, les plus actifs :" = "CPU, most active:";
+"aperçu écrit : %@" = "preview written: %@";
+"système" = "system";
+"DONNÉES" = "DATA";
+"  (lien symbolique, ignoré)" = "  (symbolic link, skipped)";
+"Récupérable sans risque : %@" = "Safely reclaimable: %@";
+"Fenêtre : construite" = "Window: built";
+"Fenêtre : ÉCHEC" = "Window: FAILED";
+"Jauge RAM tourne déjà." = "Jauge RAM is already running.";
+"  1 autre processus : %@" = "  1 other process: %@";
+"  %lld autres processus : %@" = "  %lld other processes: %@";
+"  1 processus système illisible sans root" = "  1 system process unreadable without root";
+"  %lld processus système illisibles sans root" = "  %lld system processes unreadable without root";

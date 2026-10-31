@@ -36,41 +36,41 @@ enum DiskCleanup {
     static func allTargets() -> [CacheTarget] {
         let candidates = [
             CacheTarget(
-                name: "Gradle", detail: "Dépendances et builds Android/Java",
+                name: "Gradle", detail: tr("Dépendances et builds Android/Java"),
                 path: home + "/.gradle/caches", kind: .dev),
             CacheTarget(
-                name: "uv (Python)", detail: "Paquets Python téléchargés",
+                name: "uv (Python)", detail: tr("Paquets Python téléchargés"),
                 path: home + "/.cache/uv", kind: .dev),
             CacheTarget(
-                name: "npm", detail: "Paquets Node téléchargés",
+                name: "npm", detail: tr("Paquets Node téléchargés"),
                 path: home + "/.npm/_cacache", kind: .dev),
             CacheTarget(
-                name: "bun", detail: "Paquets installés par bun",
+                name: "bun", detail: tr("Paquets installés par bun"),
                 path: home + "/.bun/install/cache", kind: .dev),
             CacheTarget(
-                name: "Hugging Face", detail: "Modèles téléchargés",
+                name: "Hugging Face", detail: tr("Modèles téléchargés"),
                 path: home + "/.cache/huggingface", kind: .dev),
             CacheTarget(
-                name: "Puppeteer", detail: "Navigateurs téléchargés pour les tests",
+                name: "Puppeteer", detail: tr("Navigateurs téléchargés pour les tests"),
                 path: home + "/.cache/puppeteer", kind: .dev),
             CacheTarget(
-                name: "Cargo (Rust)", detail: "Registre et sources téléchargés",
+                name: "Cargo (Rust)", detail: tr("Registre et sources téléchargés"),
                 path: home + "/.cargo/registry", kind: .dev),
             CacheTarget(
-                name: "Xcode DerivedData", detail: "Builds intermédiaires, reconstruits",
+                name: "Xcode DerivedData", detail: tr("Builds intermédiaires, reconstruits"),
                 path: home + "/Library/Developer/Xcode/DerivedData", kind: .dev),
             CacheTarget(
-                name: "Caches d'applications", detail: "~/Library/Caches — ferme tes apps avant",
+                name: tr("Caches d'applications"), detail: tr("~/Library/Caches — ferme tes apps avant"),
                 path: home + "/Library/Caches", kind: .system),
             CacheTarget(
-                name: "Simulateurs iOS", detail: "Appareils et runtimes CoreSimulator",
+                name: tr("Simulateurs iOS"), detail: tr("Appareils et runtimes CoreSimulator"),
                 path: home + "/Library/Developer/CoreSimulator/Caches", kind: .system),
             CacheTarget(
-                name: "Parallels Desktop", detail: "Tes machines virtuelles — DONNÉES",
+                name: "Parallels Desktop", detail: tr("Tes machines virtuelles — DONNÉES"),
                 path: home + "/Library/Group Containers/4C6364ACXT.com.parallels.desktop.appstore",
                 kind: .data),
             CacheTarget(
-                name: "Téléchargements", detail: "À trier toi-même",
+                name: tr("Téléchargements"), detail: tr("À trier toi-même"),
                 path: home + "/Downloads", kind: .data),
         ]
         return candidates.filter(\.exists)
@@ -102,13 +102,13 @@ enum DiskCleanup {
     /// s'attendent à le trouver et ne le recréent pas.
     @discardableResult
     static func clean(_ target: CacheTarget) -> (freed: UInt64, errors: [String]) {
-        guard target.isRemovable else { return (0, ["\(target.name) : protégé, non supprimé"]) }
+        guard target.isRemovable else { return (0, [tr("%@ : protégé, non supprimé", target.name)]) }
 
         let before = size(of: target)
         // `du` peut prendre plusieurs secondes : on revérifie juste avant de supprimer.
         // Il reste une fenêtre minime, sans portée : qui peut écrire dans ce dossier peut
         // déjà tout supprimer lui-même.
-        guard !target.isSymlinked else { return (0, ["\(target.name) : lien symbolique, ignoré"]) }
+        guard !target.isSymlinked else { return (0, [tr("%@ : lien symbolique, ignoré", target.name)]) }
         var errors: [String] = []
         let fm = FileManager.default
         let children = (try? fm.contentsOfDirectory(atPath: target.path)) ?? []
@@ -117,7 +117,7 @@ enum DiskCleanup {
             do {
                 try fm.removeItem(atPath: path)
             } catch {
-                errors.append("\(child) : \(error.localizedDescription)")
+                errors.append(tr("%@ : %@", child, error.localizedDescription))
             }
         }
         let after = size(of: target)

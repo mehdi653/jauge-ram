@@ -30,6 +30,9 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>CFBundleExecutable</key><string>${BINARY}</string>
     <key>CFBundleIdentifier</key><string>${BUNDLE_ID}</string>
     <key>CFBundlePackageType</key><string>APPL</string>
+    <!-- Français si le Mac est en français, anglais sinon (voir Sources/Localization.swift) -->
+    <key>CFBundleDevelopmentRegion</key><string>en</string>
+    <key>CFBundleLocalizations</key><array><string>en</string><string>fr</string></array>
     <key>CFBundleShortVersionString</key><string>1.0</string>
     <key>CFBundleVersion</key><string>1</string>
     <key>LSMinimumSystemVersion</key><string>13.0</string>
@@ -39,6 +42,9 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 </dict>
 </plist>
 PLIST
+
+echo "→ Traductions…"
+cp -R Resources/*.lproj "$APP/Contents/Resources/"
 
 echo "→ Signature ad-hoc…"
 codesign --force --deep --sign - "$APP"

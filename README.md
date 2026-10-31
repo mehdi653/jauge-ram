@@ -5,6 +5,8 @@
 Une jauge dans la barre des menus qui prévient **avant** que le Mac ne rame, et permet
 de fermer l'application fautive en deux clics. À côté, l'utilisation du processeur.
 
+L'app suit la langue du Mac : en français sur un Mac en français, en anglais sinon.
+
 ![jauge](docs/preview.png)
 
 ## Installer avec une IA
@@ -115,6 +117,10 @@ processus ne sont pas relevés au même instant.
 Ni Xcode ni dépendance : uniquement `swiftc` des Command Line Tools. Produit
 `build/Jauge RAM.app`, signée localement (ad-hoc). Mac Apple Silicon (arm64) uniquement,
 macOS 13 ou plus récent.
+
+Traductions : les textes anglais sont dans `Resources/en.lproj/Localizable.strings`, avec
+pour clé le texte français écrit dans le code (`tr("…")`, voir `Sources/Localization.swift`).
+`fr.lproj` reste vide exprès : sa présence suffit pour que macOS retienne le français.
 
 Après chaque reconstruction, quitte la jauge (menu → *Quitter Jauge RAM*) puis relance-la :
 

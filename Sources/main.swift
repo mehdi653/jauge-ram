@@ -9,18 +9,25 @@ if CommandLine.arguments.contains("--dump") {
     Thread.sleep(forTimeInterval: 1)
     let cpu = monitor.sample()
     let report = ProcessMemory.report(limit: 10, cpu: cpu?.perProcess ?? [:])
-    print("RAM totale        \(formatBytes(snap.total))")
-    print("Apps              \(formatBytes(snap.appMemory))")
-    print("Compressée        \(formatBytes(snap.compressed))")
-    print("Réservée système  \(formatBytes(snap.wired))")
-    print("Cache fichiers    \(formatBytes(snap.cached))")
-    print("Libre             \(formatBytes(snap.free))")
-    print("Swap              \(formatBytes(snap.swapUsed))")
-    print("Niveau noyau      \(snap.kernel)")
-    print("SCORE             \(Int(snap.score * 100)) % — \(snap.zone.label)")
+    // Libellé traduit, complété à 18 caractères pour aligner les valeurs.
+    func line(_ label: String, _ value: String) {
+        print(label.padding(toLength: 18, withPad: " ", startingAt: 0) + value)
+    }
+    line(tr("RAM totale"), formatBytes(snap.total))
+    line(tr("Apps"), formatBytes(snap.appMemory))
+    line(tr("Compressée"), formatBytes(snap.compressed))
+    line(tr("Réservée système"), formatBytes(snap.wired))
+    line(tr("Cache fichiers"), formatBytes(snap.cached))
+    line(tr("Libre"), formatBytes(snap.free))
+    line(tr("Swap"), formatBytes(snap.swapUsed))
+    line(tr("Niveau noyau"), "\(snap.kernel)")
+    line(tr("SCORE"), tr("%lld %% — %@", Gauge.percent(snap.score), snap.zone.label))
     if let cpu {
-        print("Processeur        \(formatShare(cpu.total)) sur \(CPUMonitor.coreCount) cœurs"
-            + " (utilisateur \(formatShare(cpu.user)), système \(formatShare(cpu.system)))")
+        line(
+            tr("Processeur"),
+            tr(
+                "%@ sur %lld cœurs (utilisateur %@, système %@)", formatShare(cpu.total),
+                CPUMonitor.coreCount, formatShare(cpu.user), formatShare(cpu.system)))
     }
     print("")
     for entry in report.entries {
@@ -29,10 +36,16 @@ if CommandLine.arguments.contains("--dump") {
         let name = entry.name.padding(toLength: 26, withPad: " ", startingAt: 0)
         print("  [\(tag)] \(name) \(formatBytes(entry.footprint))\(procs)")
     }
-    print("  \(report.otherCount) autres processus : \(formatBytes(report.otherTotal))")
-    print("  \(report.unreadableCount) processus système illisibles sans root")
+    print(
+        tr(
+            count: report.otherCount, one: "  1 autre processus : %@",
+            other: "  %lld autres processus : %@", formatBytes(report.otherTotal)))
+    print(
+        tr(
+            count: report.unreadableCount, one: "  1 processus système illisible sans root",
+            other: "  %lld processus système illisibles sans root"))
     print("")
-    print("Processeur, les plus actifs :")
+    print(tr("Processeur, les plus actifs :"))
     for entry in report.cpuEntries {
         let procs = entry.processCount > 1 ? "  (\(entry.processCount) proc)" : ""
         let name = entry.name.padding(toLength: 26, withPad: " ", startingAt: 0)
@@ -69,7 +82,7 @@ if let idx = CommandLine.arguments.firstIndex(of: "--preview"),
        let rep = NSBitmapImageRep(data: tiff),
        let png = rep.representation(using: .png, properties: [:]) {
         try? png.write(to: URL(fileURLWithPath: out))
-        print("aperçu écrit : \(out)")
+        print(tr("aperçu écrit : %@", out))
     }
     exit(0)
 }
@@ -77,29 +90,31 @@ if let idx = CommandLine.arguments.firstIndex(of: "--preview"),
 // Diagnostic disque : liste les cibles de nettoyage et leur taille, sans rien supprimer.
 if CommandLine.arguments.contains("--disk") {
     let disk = DiskCleanup.diskSpace()
-    print("Disque : \(formatBytes(disk.free)) libres sur \(formatBytes(disk.total)) "
-        + "— occupé à \(Int(disk.usedRatio * 100)) %\(disk.isTight ? "  ⚠︎" : "")")
+    print(
+        tr("Disque : %@ libres sur %@ — occupé à %lld %%", formatBytes(disk.free),
+            formatBytes(disk.total), Int(disk.usedRatio * 100)) + (disk.isTight ? "  ⚠︎" : ""))
     print("")
     var reclaimable: UInt64 = 0
     for target in DiskCleanup.allTargets() {
         let size = DiskCleanup.size(of: target)
         let kind: String
         switch target.kind {
-        case .dev: kind = "dev   "; if target.isRemovable { reclaimable += size }
-        case .system: kind = "système"
-        case .data: kind = "DONNÉES"
+        case .dev: kind = "dev"; if target.isRemovable { reclaimable += size }
+        case .system: kind = tr("système")
+        case .data: kind = tr("DONNÉES")
         }
         let mark = target.checkedByDefault ? "☑" : "☐"
+        let tag = kind.padding(toLength: 7, withPad: " ", startingAt: 0)
         let name = target.name.padding(toLength: 22, withPad: " ", startingAt: 0)
-        let link = target.isSymlinked ? "  (lien symbolique, ignoré)" : ""
-        print(" \(mark) [\(kind)] \(name) \(formatBytes(size))\(link)")
+        let link = target.isSymlinked ? tr("  (lien symbolique, ignoré)") : ""
+        print(" \(mark) [\(tag)] \(name) \(formatBytes(size))\(link)")
     }
     print("")
-    print("Récupérable sans risque : \(formatBytes(reclaimable))")
+    print(tr("Récupérable sans risque : %@", formatBytes(reclaimable)))
 
     // Vérifie que la fenêtre se construit (contraintes Auto Layout comprises).
     let controller = CleanupWindowController()
-    print("Fenêtre : \(controller.window != nil ? "construite" : "ÉCHEC")")
+    print(controller.window != nil ? tr("Fenêtre : construite") : tr("Fenêtre : ÉCHEC"))
     exit(0)
 }
 
@@ -113,7 +128,7 @@ let isDiagnostic = CommandLine.arguments.contains { diagnosticFlags.contains($0)
 let lockPath = NSHomeDirectory() + "/Library/Caches/com.mehdi.jaugeram.lock"
 let lockDescriptor = open(lockPath, O_CREAT | O_RDWR, 0o644)
 if !isDiagnostic, lockDescriptor < 0 || flock(lockDescriptor, LOCK_EX | LOCK_NB) != 0 {
-    FileHandle.standardError.write("Jauge RAM tourne déjà.\n".data(using: .utf8)!)
+    FileHandle.standardError.write((tr("Jauge RAM tourne déjà.") + "\n").data(using: .utf8)!)
     exit(0)
 }
 

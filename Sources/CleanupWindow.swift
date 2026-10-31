@@ -12,8 +12,8 @@ final class CleanupWindowController: NSWindowController, NSTableViewDataSource, 
     private var rows: [Row] = []
     private let tableView = NSTableView()
     private let headerLabel = NSTextField(labelWithString: "")
-    private let statusLabel = NSTextField(labelWithString: "Calcul des tailles…")
-    private let cleanButton = NSButton(title: "Nettoyer la sélection", target: nil, action: nil)
+    private let statusLabel = NSTextField(labelWithString: tr("Calcul des tailles…"))
+    private let cleanButton = NSButton(title: tr("Nettoyer la sélection"), target: nil, action: nil)
     private var isWorking = false
 
     convenience init() {
@@ -21,7 +21,7 @@ final class CleanupWindowController: NSWindowController, NSTableViewDataSource, 
             contentRect: NSRect(x: 0, y: 0, width: 580, height: 520),
             styleMask: [.titled, .closable, .miniaturizable],
             backing: .buffered, defer: false)
-        window.title = "Nettoyage du disque"
+        window.title = tr("Nettoyage du disque")
         window.center()
         self.init(window: window)
         buildInterface()
@@ -56,7 +56,7 @@ final class CleanupWindowController: NSWindowController, NSTableViewDataSource, 
         cleanButton.bezelStyle = .rounded
         cleanButton.keyEquivalent = "\r"
 
-        let close = NSButton(title: "Fermer", target: self, action: #selector(closeWindow))
+        let close = NSButton(title: tr("Fermer"), target: self, action: #selector(closeWindow))
         close.bezelStyle = .rounded
 
         let buttons = NSStackView(views: [statusLabel, NSView(), close, cleanButton])
@@ -85,7 +85,8 @@ final class CleanupWindowController: NSWindowController, NSTableViewDataSource, 
         let disk = DiskCleanup.diskSpace()
         let percent = Int(disk.usedRatio * 100)
         headerLabel.stringValue =
-            "Disque : \(formatBytes(disk.free)) libres sur \(formatBytes(disk.total)) — occupé à \(percent) %"
+            tr("Disque : %@ libres sur %@ — occupé à %lld %%",
+                formatBytes(disk.free), formatBytes(disk.total), percent)
         headerLabel.textColor = disk.isTight ? .systemOrange : .labelColor
     }
 
@@ -135,7 +136,8 @@ final class CleanupWindowController: NSWindowController, NSTableViewDataSource, 
         let total = selectedSize
         cleanButton.isEnabled = total > 0 && !isWorking
         cleanButton.title =
-            total > 0 ? "Nettoyer la sélection (\(formatBytes(total)))" : "Nettoyer la sélection"
+            total > 0
+            ? tr("Nettoyer la sélection (%@)", formatBytes(total)) : tr("Nettoyer la sélection")
     }
 
     // MARK: - Tableau
@@ -156,9 +158,10 @@ final class CleanupWindowController: NSWindowController, NSTableViewDataSource, 
 
         let detailText =
             model.cleaned
-            ? "Nettoyé"
+            ? tr("Nettoyé")
             : model.target.isSymlinked
-                ? "Lien symbolique : ignoré, pour ne pas vider le dossier visé" : model.target.detail
+                ? tr("Lien symbolique : ignoré, pour ne pas vider le dossier visé")
+                : model.target.detail
         let detail = NSTextField(labelWithString: detailText)
         detail.font = .systemFont(ofSize: 10)
         detail.textColor = model.target.isRemovable ? .secondaryLabelColor : .systemOrange
@@ -210,19 +213,21 @@ final class CleanupWindowController: NSWindowController, NSTableViewDataSource, 
         guard !selected.isEmpty else { return }
 
         let alert = NSAlert()
-        alert.messageText = "Vider \(selected.count) cache(s) ?"
+        alert.messageText = tr(
+            count: selected.count, one: "Vider 1 cache ?", other: "Vider %lld caches ?")
         alert.informativeText =
             selected.map { "• \($0.target.name) — \($0.size.map(formatBytes) ?? "?")" }
-            .joined(separator: "\n")
-            + "\n\nLe contenu est supprimé définitivement (pas de passage par la corbeille). "
-            + "Ces caches se reconstruisent tout seuls ; le prochain build sera plus lent."
+            .joined(separator: "\n") + "\n\n"
+            + tr(
+                "Le contenu est supprimé définitivement (pas de passage par la corbeille). "
+                    + "Ces caches se reconstruisent tout seuls ; le prochain build sera plus lent.")
         alert.alertStyle = .warning
-        alert.addButton(withTitle: "Vider")
-        alert.addButton(withTitle: "Annuler")
+        alert.addButton(withTitle: tr("Vider"))
+        alert.addButton(withTitle: tr("Annuler"))
         guard alert.runModal() == .alertFirstButtonReturn else { return }
 
         isWorking = true
-        statusLabel.stringValue = "Nettoyage…"
+        statusLabel.stringValue = tr("Nettoyage…")
         updateCleanButton()
         tableView.reloadData()
 
@@ -249,8 +254,11 @@ final class CleanupWindowController: NSWindowController, NSTableViewDataSource, 
                 self.updateCleanButton()
                 self.statusLabel.stringValue =
                     errors.isEmpty
-                    ? "\(formatBytes(freed)) libérés"
-                    : "\(formatBytes(freed)) libérés · \(errors.count) élément(s) verrouillé(s)"
+                    ? tr("%@ libérés", formatBytes(freed))
+                    : tr("%@ libérés", formatBytes(freed)) + " · "
+                        + tr(
+                            count: errors.count, one: "1 élément verrouillé",
+                            other: "%lld éléments verrouillés")
             }
         }
     }

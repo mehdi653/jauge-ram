@@ -6,10 +6,9 @@ A gauge in the macOS menu bar that warns you **before** your Mac starts to slow 
 lets you close the offending app in two clicks. Next to it, CPU usage. ("Jauge" is French
 for "gauge".)
 
-The app's interface is in French; this README gives the English meaning of every menu
-item it mentions.
+The app follows your Mac's language: French on a Mac set to French, English otherwise.
 
-![gauge](docs/preview.png)
+![gauge](docs/preview.en.png)
 
 ## Install with an AI
 
@@ -31,14 +30,14 @@ steps in order; if one fails, stop and explain the problem to me.
    `git -C ~/jauge-ram pull --ff-only`. Otherwise, ask me what to do.
 4. Read ~/jauge-ram/build.sh and summarize in one sentence what it does.
 5. If Jauge RAM is already running (`pgrep -x JaugeRAM`), ask me to quit it (gauge
-   menu → "Quitter Jauge RAM", which means Quit) and wait for my confirmation.
+   menu → "Quit Jauge RAM") and wait for my confirmation.
 6. Build: `cd ~/jauge-ram && ./build.sh`.
 7. Launch the app: `open ~/jauge-ram/build/"Jauge RAM.app"`, then check that it is
    running (`pgrep -x JaugeRAM`). If macOS refuses to open it, tell me to go to
    System Settings → Privacy & Security → "Open Anyway".
 8. Ask me whether I see a "RAM / CPU" gauge in the menu bar. If not, the menu bar is
    often too full (notch): removing another icon brings it back. Remind me that
-   "Lancer au démarrage" (launch at login) can be checked in the gauge's menu.
+   "Launch at Login" can be checked in the gauge's menu.
 
 Never use sudo. Apart from the Command Line Tools if they are missing, do not install
 or change anything outside ~/jauge-ram; once launched, the app manages its own files.
@@ -96,17 +95,17 @@ they are often the real culprits (a dev server, a VM).
 
 Each line opens a submenu:
 
-- **Passer à l'app** (switch to the app) — to save your work before closing it
-- **Quitter** (quit) — a polite request; the app may offer to save
-- **Forcer à quitter / Arrêter** (force quit / stop) — with confirmation; unsaved work
+- **Switch to App** — to save your work before closing it
+- **Quit** — a polite request; the app may offer to save
+- **Force Quit / Stop Process** — with confirmation; unsaved work
   is lost
 
 Components shipped with macOS are shown but never offered for stopping: they restart on
 their own and killing them frees nothing.
 
 Then **the biggest CPU users** (5 at most, above 1% of the machine), grouped the same
-way and with the same submenus. The last line, *Autres processus et système* (other
-processes and system), estimates what the list is missing to reach the total: processes
+way and with the same submenus. The last line, *Other processes and system*,
+estimates what the list is missing to reach the total: processes
 beyond the five shown, small ones, and above all root processes the app cannot read (see
 the limitations). It is an estimate (`≈`): the total and the processes are not sampled at
 exactly the same instant.
@@ -121,7 +120,11 @@ No Xcode, no dependencies: only `swiftc` from the Command Line Tools. Produces
 `build/Jauge RAM.app`, signed locally (ad-hoc). Apple Silicon (arm64) Macs only,
 macOS 13 or later.
 
-After each rebuild, quit the gauge (menu → *Quitter Jauge RAM*, quit) and relaunch it:
+Translations: the English text lives in `Resources/en.lproj/Localizable.strings`, keyed by
+the French text written in the code (`tr("…")`, see `Sources/Localization.swift`).
+`fr.lproj` is deliberately empty: its presence is enough for macOS to pick French.
+
+After each rebuild, quit the gauge (menu → *Quit Jauge RAM*) and relaunch it:
 
 ```bash
 open "build/Jauge RAM.app"
@@ -130,7 +133,7 @@ open "build/Jauge RAM.app"
 ## Launch
 
 Double-click `build/Jauge RAM.app`. No Dock icon: everything lives in the menu bar.
-*Lancer au démarrage* (launch at login) in the menu installs a LaunchAgent
+*Launch at Login* in the menu installs a LaunchAgent
 (`~/Library/LaunchAgents/com.mehdi.jaugeram.plist`).
 
 The LaunchAgent runs `open -g` on the app, not its executable. On macOS 15, an ad-hoc
@@ -166,7 +169,7 @@ Swap lives on the disk. An APFS SSD degrades beyond 90% usage, and beyond 95% sw
 no room left: the machine stalls exactly as if RAM were full. The gauge therefore shows
 free space in its menu and warns you (at most once every 30 min) below 10 GB.
 
-*Nettoyer les caches…* (clean caches) opens a window listing **known, hard-coded** paths
+*Clean Caches…* opens a window listing **known, hard-coded** paths
 — no folder is discovered automatically, nothing outside this list is ever deleted.
 
 Three categories:
@@ -175,9 +178,9 @@ Three categories:
   Puppeteer, DerivedData). Fully rebuilt when needed, but everything has to be
   downloaded again: the next build is slower, and Hugging Face models can weigh several
   GB and be unavailable offline. Uncheck what you want to keep.
-- **système** (system) — unchecked. `~/Library/Caches`, simulator caches. Safe, but an
+- **system** — unchecked. `~/Library/Caches`, simulator caches. Safe, but an
   open app may complain: close your apps first.
-- **DONNÉES** (data) — never deletable from the window, shown for information only
+- **DATA** — never deletable from the window, shown for information only
   (Parallels virtual machines, Downloads). These are your files.
 
 The folders' contents are emptied and the folder itself is kept — some tools do not
@@ -197,11 +200,10 @@ handles much better than we could.
 ## Known limitations
 
 - About 240 system processes owned by `root` cannot be measured without root
-  privileges; they are missing from the *Arrière-plan et système* (background and
-  system) total.
+  privileges; they are missing from the *Background and system* total.
 - For the CPU it is more visible: Spotlight (`mds_stores`), `WindowServer` and
   `kernel_task` are often the busiest, and never appear in the list. The total includes
-  them; they fall into *Autres processus et système*.
+  them; they fall into *Other processes and system*.
 - If the menu bar is very crowded, the gauge can still slip behind the notch and
   disappear, and the app cannot reliably detect it. Removing another icon (⌘-drag it out
   of the bar) brings it back.

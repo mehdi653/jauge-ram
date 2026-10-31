@@ -13,9 +13,9 @@ enum Zone {
 
     var label: String {
         switch self {
-        case .ok: return "OK"
-        case .warn: return "Ça chauffe"
-        case .critical: return "Critique — ferme une app"
+        case .ok: return tr("OK")
+        case .warn: return tr("Ça chauffe")
+        case .critical: return tr("Critique — ferme une app")
         }
     }
 }

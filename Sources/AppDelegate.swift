@@ -25,7 +25,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // VoiceOver lit donc le nom ici et les mesures dans la valeur, mise à jour à chaque relevé.
         statusItem.button?.imagePosition = .imageOnly
         statusItem.button?.setAccessibilityLabel("Jauge RAM")
-        statusItem.button?.toolTip = "Pression mémoire"
+        statusItem.button?.toolTip = tr("Pression mémoire")
 
         menu.delegate = self
         statusItem.menu = menu
@@ -41,7 +41,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if CommandLine.arguments.contains("--test-alert") {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 self.report = ProcessMemory.report(limit: 3)
-                print("bundle détecté : \(self.hasBundle) — \(Bundle.main.bundleIdentifier ?? "aucun")")
+                print(
+                    tr(
+                        "bundle détecté : %@ — %@", "\(self.hasBundle)",
+                        Bundle.main.bundleIdentifier ?? tr("aucun")))
                 self.alertIfNeeded()
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 4) { exit(0) }
@@ -71,12 +74,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             score: snapshot.score, zone: zone, cpu: cpu?.total, dark: dark)
         let percent = Gauge.percent(snapshot.score)
         statusItem.button?.setAccessibilityValue(
-            "Pression mémoire \(percent) %, \(zone.label). Processeur : \(cpuText())")
-        statusItem.button?.toolTip = """
-            Pression mémoire : \(percent) % — \(zone.label)
-            Swap : \(formatBytes(snapshot.swapUsed))
-            Processeur : \(cpuText())
-            """
+            tr("Pression mémoire %lld %%, %@. Processeur : %@", percent, zone.label, cpuText()))
+        statusItem.button?.toolTip = tr(
+            "Pression mémoire : %lld %% — %@\nSwap : %@\nProcesseur : %@",
+            percent, zone.label, formatBytes(snapshot.swapUsed), cpuText())
 
         checkDisk()
 
@@ -110,26 +111,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         menu.addItem(.separator())
 
-        addInfo("Apps", formatBytes(snapshot.appMemory))
-        addInfo("Mémoire compressée", formatBytes(snapshot.compressed))
-        addInfo("Réservée système", formatBytes(snapshot.wired))
-        addInfo("Fichiers en cache", formatBytes(snapshot.cached) + " (récupérable)")
-        addInfo("Swap sur disque", swapText())
+        addInfo(tr("Apps"), formatBytes(snapshot.appMemory))
+        addInfo(tr("Mémoire compressée"), formatBytes(snapshot.compressed))
+        addInfo(tr("Réservée système"), formatBytes(snapshot.wired))
+        addInfo(tr("Fichiers en cache"), tr("%@ (récupérable)", formatBytes(snapshot.cached)))
+        addInfo(tr("Swap sur disque"), swapText())
 
         let disk = DiskCleanup.diskSpace()
-        var diskText = formatBytes(disk.free) + " libres"
+        var diskText = tr("%@ libres", formatBytes(disk.free))
         if disk.isTight {
-            diskText += "  ⚠︎ disque plein à \(Int(disk.usedRatio * 100)) %"
+            diskText += tr("  ⚠︎ disque plein à %lld %%", Int(disk.usedRatio * 100))
         }
-        addInfo("Espace disque", diskText)
-        addInfo("Processeur", cpuText())
+        addInfo(tr("Espace disque"), diskText)
+        addInfo(tr("Processeur"), cpuText())
 
         menu.addItem(.separator())
 
-        addSectionTitle("Les plus gourmands en mémoire")
+        addSectionTitle(tr("Les plus gourmands en mémoire"))
 
         if report.entries.isEmpty {
-            addPlaceholder("Analyse en cours…")
+            addPlaceholder(tr("Analyse en cours…"))
         }
 
         for usage in report.entries {
@@ -138,17 +139,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         if report.otherCount > 0 {
             menu.addItem(.separator())
-            let detail = "\(report.otherCount) processus · \(formatBytes(report.otherTotal))"
-            addInfo("Arrière-plan et système", detail)
+            let detail = tr(
+                count: report.otherCount, one: "1 processus · %@", other: "%lld processus · %@",
+                formatBytes(report.otherTotal))
+            addInfo(tr("Arrière-plan et système"), detail)
         }
 
         menu.addItem(.separator())
 
-        addSectionTitle("Les plus gourmands en processeur")
+        addSectionTitle(tr("Les plus gourmands en processeur"))
 
         if let cpu = cpuMonitor.latest {
             if report.cpuEntries.isEmpty {
-                addPlaceholder("Aucun processus actif")
+                addPlaceholder(tr("Aucun processus actif"))
             }
             for usage in report.cpuEntries {
                 menu.addItem(appItem(for: usage, measure: .cpu))
@@ -161,33 +164,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let listed = report.cpuEntries.reduce(0) { $0 + $1.cpu }
             let rest = cpu.total - listed
             if rest >= 0.01 {
-                addInfo("Autres processus et système", "≈ " + formatShare(rest))
+                addInfo(tr("Autres processus et système"), "≈ " + formatShare(rest))
             }
         } else {
-            addPlaceholder("Mesure en cours…")
+            addPlaceholder(tr("Mesure en cours…"))
         }
 
         menu.addItem(.separator())
 
         let cleanup = NSMenuItem(
-            title: "Nettoyer les caches…", action: #selector(showCleanup), keyEquivalent: "")
+            title: tr("Nettoyer les caches…"), action: #selector(showCleanup), keyEquivalent: "")
         cleanup.target = self
         menu.addItem(cleanup)
 
         let monitor = NSMenuItem(
-            title: "Ouvrir le Moniteur d'activité",
+            title: tr("Ouvrir le Moniteur d'activité"),
             action: #selector(openActivityMonitor), keyEquivalent: "")
         monitor.target = self
         menu.addItem(monitor)
 
         let login = NSMenuItem(
-            title: "Lancer au démarrage", action: #selector(toggleLoginItem), keyEquivalent: "")
+            title: tr("Lancer au démarrage"), action: #selector(toggleLoginItem), keyEquivalent: "")
         login.target = self
         login.state = LoginItem.isEnabled ? .on : .off
         menu.addItem(login)
 
         let quit = NSMenuItem(
-            title: "Quitter Jauge RAM", action: #selector(quitSelf), keyEquivalent: "q")
+            title: tr("Quitter Jauge RAM"), action: #selector(quitSelf), keyEquivalent: "q")
         quit.target = self
         menu.addItem(quit)
     }
@@ -195,7 +198,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func headerText(zone: Zone) -> NSAttributedString {
         let percent = Int((snapshot.score * 100).rounded())
         let text = NSMutableAttributedString(
-            string: "Pression mémoire  \(percent) %\n",
+            string: tr("Pression mémoire  %lld %%\n", percent),
             attributes: [.font: NSFont.systemFont(ofSize: 13, weight: .semibold)])
         text.append(
             NSAttributedString(
@@ -208,13 +211,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func swapText() -> String {
-        if snapshot.swapUsed == 0 { return "aucun" }
+        if snapshot.swapUsed == 0 { return tr("aucun") }
         return formatBytes(snapshot.swapUsed)
     }
 
     private func cpuText() -> String {
-        guard let cpu = cpuMonitor.latest else { return "mesure en cours…" }
-        return "\(formatShare(cpu.total)) sur \(CPUMonitor.coreCount) cœurs"
+        guard let cpu = cpuMonitor.latest else { return tr("mesure en cours…") }
+        return tr("%@ sur %lld cœurs", formatShare(cpu.total), CPUMonitor.coreCount)
     }
 
     private func addSectionTitle(_ title: String) {
@@ -265,7 +268,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             attributes: [.font: NSFont.systemFont(ofSize: 12)])
         var detail = measure == .memory ? formatBytes(usage.footprint) : formatShare(usage.cpu)
         if usage.processCount > 1 {
-            detail += "  ·  \(usage.processCount) processus"
+            detail += tr("  ·  %lld processus", usage.processCount)
         }
         text.append(
             NSAttributedString(
@@ -289,7 +292,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         if usage.isApp {
             let reveal = NSMenuItem(
-                title: "Passer à l'app", action: #selector(activateApp(_:)), keyEquivalent: "")
+                title: tr("Passer à l'app"), action: #selector(activateApp(_:)), keyEquivalent: "")
             reveal.target = self
             reveal.representedObject = usage
             submenu.addItem(reveal)
@@ -297,21 +300,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             submenu.addItem(.separator())
 
             let quit = NSMenuItem(
-                title: "Quitter \(usage.name)", action: #selector(quitApp(_:)), keyEquivalent: "")
+                title: tr("Quitter %@", usage.name), action: #selector(quitApp(_:)), keyEquivalent: "")
             quit.target = self
             quit.representedObject = usage
             submenu.addItem(quit)
         } else {
             let label = usage.isSystem
-                ? "Composant système · pid \(usage.id)"
-                : "Processus en arrière-plan · pid \(usage.id)"
+                ? tr("Composant système · pid %d", usage.id)
+                : tr("Processus en arrière-plan · pid %d", usage.id)
             let info = NSMenuItem(title: label, action: nil, keyEquivalent: "")
             info.isEnabled = false
             submenu.addItem(info)
 
             if usage.isSystem {
                 let note = NSMenuItem(
-                    title: "Géré par macOS — ne pas arrêter", action: nil, keyEquivalent: "")
+                    title: tr("Géré par macOS — ne pas arrêter"), action: nil, keyEquivalent: "")
                 note.isEnabled = false
                 submenu.addItem(note)
             } else {
@@ -322,8 +325,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if usage.isStoppable {
             let force = NSMenuItem(
                 title: usage.isApp
-                    ? "Forcer à quitter (travail non enregistré perdu)"
-                    : "Arrêter le processus",
+                    ? tr("Forcer à quitter (travail non enregistré perdu)")
+                    : tr("Arrêter le processus"),
                 action: #selector(forceQuitApp(_:)), keyEquivalent: "")
             force.target = self
             force.representedObject = usage
@@ -351,15 +354,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         guard let usage = sender.representedObject as? AppUsage else { return }
 
         let alert = NSAlert()
-        alert.messageText = "Forcer \(usage.name) à quitter ?"
+        alert.messageText = tr("Forcer %@ à quitter ?", usage.name)
         alert.informativeText =
             usage.isApp
-            ? "Tout travail non enregistré sera perdu."
-            : "Ce processus sera arrêté immédiatement (pid \(usage.id)). "
-                + "S'il fait partie du système ou d'un travail en cours, il peut y avoir des dégâts."
+            ? tr("Tout travail non enregistré sera perdu.")
+            : tr(
+                "Ce processus sera arrêté immédiatement (pid %d). S'il fait partie du système "
+                    + "ou d'un travail en cours, il peut y avoir des dégâts.", usage.id)
         alert.alertStyle = .warning
-        alert.addButton(withTitle: usage.isApp ? "Forcer à quitter" : "Arrêter")
-        alert.addButton(withTitle: "Annuler")
+        alert.addButton(withTitle: usage.isApp ? tr("Forcer à quitter") : tr("Arrêter"))
+        alert.addButton(withTitle: tr("Annuler"))
         NSApp.activate(ignoringOtherApps: true)
         guard alert.runModal() == .alertFirstButtonReturn else { return }
 
@@ -422,8 +426,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         lastDiskAlert = Date()
 
         notify(
-            title: "Disque presque plein — \(formatBytes(disk.free)) libres",
-            body: "Le swap n'a plus de place. Ouvre « Nettoyer les caches… » dans la jauge.")
+            title: tr("Disque presque plein — %@ libres", formatBytes(disk.free)),
+            body: tr("Le swap n'a plus de place. Ouvre « Nettoyer les caches… » dans la jauge."))
     }
 
     private func alertIfNeeded() {
@@ -434,10 +438,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let names = worst.prefix(3).map { "\($0.name) (\(formatBytes($0.footprint)))" }
         let body =
             names.isEmpty
-            ? "Ferme une application pour éviter que le Mac ne rame."
-            : "Les plus gourmandes : " + names.joined(separator: ", ")
+            ? tr("Ferme une application pour éviter que le Mac ne rame.")
+            : tr("Les plus gourmandes : %@", names.joined(separator: ", "))
 
-        notify(title: "Mémoire critique — \(Int(snapshot.score * 100)) %", body: body)
+        notify(title: tr("Mémoire critique — %lld %%", Gauge.percent(snapshot.score)), body: body)
     }
 
     private func notify(title: String, body: String) {
@@ -461,12 +465,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func selfTest() {
         let frame = statusItem.button?.window?.frame ?? .zero
         print("status item  frame=\(frame) visible=\(statusItem.isVisible)")
-        print("image        \(statusItem.button?.image?.size.debugDescription ?? "AUCUNE")")
-        print("libellé      \(statusItem.button?.accessibilityLabel() ?? "AUCUN")")
-        print("valeur       \(statusItem.button?.accessibilityValue() as? String ?? "AUCUNE")")
+        let none = tr("AUCUN")
+        print("image        \(statusItem.button?.image?.size.debugDescription ?? none)")
+        print(tr("libellé      %@", statusItem.button?.accessibilityLabel() ?? none))
+        print(tr("valeur       %@", statusItem.button?.accessibilityValue() as? String ?? none))
         print("")
         menuWillOpen(menu)
-        print("menu : \(menu.numberOfItems) éléments")
+        print(tr("menu : %lld éléments", menu.numberOfItems))
         for item in menu.items {
             let title = item.isSeparatorItem ? "──────────" : item.title.isEmpty
                 ? item.attributedTitle?.string.replacingOccurrences(of: "\n", with: " / ") ?? "?"
